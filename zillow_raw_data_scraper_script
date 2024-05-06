@@ -1,0 +1,277 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "286bf628-9c3b-4822-942d-d1ab5b324860",
+   "metadata": {},
+   "source": [
+    "## Zillow data extract"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a213747b-d130-40e8-9065-32a4ba5ed756",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import requests\n",
+    "import pandas as pd\n",
+    "\n",
+    "# Initialize an empty list to store DataFrames created from each API response.\n",
+    "dfs = []\n",
+    "\n",
+    "# Set the base URL for the Zillow API.\n",
+    "url = \"https://zillow56.p.rapidapi.com/search\"\n",
+    "# Define the headers including the API key and host for the Zillow API.\n",
+    "headers = {\n",
+    "    \"X-RapidAPI-Key\": \"b7c73cd2c8msh64bbcb44f18ef34p16d1a9jsn841f840d488f\",\n",
+    "    \"X-RapidAPI-Host\": \"zillow56.p.rapidapi.com\"\n",
+    "}\n",
+    "\n",
+    "\n",
+    "list_of_states= [\"Washington\",\"Virginia\",\"New Jersy\",\"New Hampshire\",\"Massachusetts\",\"Delaware\",\"California\",\"Texas\",\"Connecticut\",\"Florida\",\"Georgia\",\"Indiana\",\n",
+    "                 \"Newyork\",\"North Carolina\",\"Ohio\",\"Pennsylvania\",\"Arizona\"]\n",
+    "# Loop through pages 1 to 50 to fetch data for each page.\n",
+    "\n",
+    "for state in list_of_states:\n",
+    "    for page in range(1, 50):\n",
+    "        # Update the query string with the current page number.\n",
+    "        querystring = {\"location\": state, \"page\": str(page)}\n",
+    "        # Make the HTTP GET request to the Zillow API with the specified parameters.\n",
+    "        response = requests.get(url, headers=headers, params=querystring)\n",
+    "        # Parse the JSON response.\n",
+    "        data = response.json()\n",
+    "    \n",
+    "        # Create a DataFrame from the JSON response.\n",
+    "        # Note: This step assumes that the JSON response is structured as a list of records.\n",
+    "        df = pd.DataFrame(data)\n",
+    "    \n",
+    "        # Append the newly created DataFrame to the list of DataFrames.\n",
+    "        dfs.append(df)\n",
+    "\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "id": "1139e499",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Concatenate all the DataFrames in the list into a single DataFrame.\n",
+    "# This results in a combined DataFrame containing the data from all pages.\n",
+    "final_df = pd.concat(dfs, ignore_index=True)\n",
+    "\n",
+    "# Save the aggregated DataFrame to a CSV file without the index column.\n",
+    "final_df.to_csv('raw_data.csv', index=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9f637c29-f285-4394-a9bd-0f101d7d9aa1",
+   "metadata": {},
+   "source": [
+    "## convert json to csv readable data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "7e79e53a",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "   bathrooms  bedrooms             city country currency  daysOnZillow  \\\n",
+      "0        2.0       3.0             Mesa     USA      USD             0   \n",
+      "1        2.0       3.0         Florence     USA      USD             0   \n",
+      "2        2.0       3.0         Lakeside     USA      USD             0   \n",
+      "3        NaN       NaN         Wittmann     USA      USD             0   \n",
+      "4        4.0       4.0  Litchfield Park     USA      USD             0   \n",
+      "\n",
+      "  homeStatus homeStatusForHDP       homeType  \\\n",
+      "0   FOR_SALE         FOR_SALE  SINGLE_FAMILY   \n",
+      "1   FOR_SALE         FOR_SALE   MANUFACTURED   \n",
+      "2   FOR_SALE         FOR_SALE  SINGLE_FAMILY   \n",
+      "3   FOR_SALE         FOR_SALE            LOT   \n",
+      "4   FOR_SALE         FOR_SALE  SINGLE_FAMILY   \n",
+      "\n",
+      "                                              imgSrc  ...  group_type  \\\n",
+      "0  https://photos.zillowstatic.com/fp/ad24065ca0c...  ...         NaN   \n",
+      "1  https://photos.zillowstatic.com/fp/bece82055b4...  ...         NaN   \n",
+      "2  https://photos.zillowstatic.com/fp/df76c429885...  ...         NaN   \n",
+      "3  https://photos.zillowstatic.com/fp/35f83be8056...  ...         NaN   \n",
+      "4  https://photos.zillowstatic.com/fp/6cb23f323b4...  ...         NaN   \n",
+      "\n",
+      "   newConstructionType  priceSuffix  providerListingID  openHouse  \\\n",
+      "0                  NaN          NaN                NaN        NaN   \n",
+      "1                  NaN          NaN                NaN        NaN   \n",
+      "2                  NaN          NaN                NaN        NaN   \n",
+      "3                  NaN          NaN                NaN        NaN   \n",
+      "4                  NaN          NaN                NaN        NaN   \n",
+      "\n",
+      "   open_house_info  videoCount  priceReduction isRentalWithBasePrice  \\\n",
+      "0              NaN         NaN             NaN                   NaN   \n",
+      "1              NaN         NaN             NaN                   NaN   \n",
+      "2              NaN         NaN             NaN                   NaN   \n",
+      "3              NaN         NaN             NaN                   NaN   \n",
+      "4              NaN         NaN             NaN                   NaN   \n",
+      "\n",
+      "   comingSoonOnMarketDate  \n",
+      "0                     NaN  \n",
+      "1                     NaN  \n",
+      "2                     NaN  \n",
+      "3                     NaN  \n",
+      "4                     NaN  \n",
+      "\n",
+      "[5 rows x 47 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "\n",
+    "# Load the CSV file into a DataFrame.\n",
+    "df = pd.read_csv('all_merged_data.csv')\n",
+    "\n",
+    "# Assuming 'df' is your DataFrame with the 'results' column containing dictionaries\n",
+    "result_dicts = df['results'].apply(eval).tolist()\n",
+    "\n",
+    "# Create an empty list to store the row data\n",
+    "row_data = []\n",
+    "\n",
+    "# Iterate over each dictionary\n",
+    "for d in result_dicts:\n",
+    "    row_data.append(d)\n",
+    "\n",
+    "# Create a new DataFrame from the row data\n",
+    "new_df = pd.DataFrame(row_data)\n",
+    "\n",
+    "print(new_df.head())\n",
+    "\n",
+    "new_df.to_csv('converted_data.csv', index=False)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "b366db11-48f2-49ed-b715-240ea7c95e9c",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "RangeIndex: 20131 entries, 0 to 20130\n",
+      "Data columns (total 47 columns):\n",
+      " #   Column                   Non-Null Count  Dtype  \n",
+      "---  ------                   --------------  -----  \n",
+      " 0   bathrooms                18859 non-null  float64\n",
+      " 1   bedrooms                 18584 non-null  float64\n",
+      " 2   city                     20131 non-null  object \n",
+      " 3   country                  20131 non-null  object \n",
+      " 4   currency                 20131 non-null  object \n",
+      " 5   daysOnZillow             20131 non-null  int64  \n",
+      " 6   homeStatus               20131 non-null  object \n",
+      " 7   homeStatusForHDP         20131 non-null  object \n",
+      " 8   homeType                 20131 non-null  object \n",
+      " 9   imgSrc                   20131 non-null  object \n",
+      " 10  isFeatured               20131 non-null  bool   \n",
+      " 11  isNonOwnerOccupied       20131 non-null  bool   \n",
+      " 12  isPreforeclosureAuction  20131 non-null  bool   \n",
+      " 13  isPremierBuilder         20131 non-null  bool   \n",
+      " 14  isShowcaseListing        20131 non-null  bool   \n",
+      " 15  isUnmappable             20131 non-null  bool   \n",
+      " 16  isZillowOwned            20131 non-null  bool   \n",
+      " 17  latitude                 20001 non-null  float64\n",
+      " 18  listing_sub_type         20131 non-null  object \n",
+      " 19  livingArea               18357 non-null  float64\n",
+      " 20  longitude                20001 non-null  float64\n",
+      " 21  lotAreaUnit              17325 non-null  object \n",
+      " 22  lotAreaValue             17325 non-null  float64\n",
+      " 23  price                    20131 non-null  float64\n",
+      " 24  priceForHDP              20131 non-null  float64\n",
+      " 25  shouldHighlight          20131 non-null  bool   \n",
+      " 26  state                    20131 non-null  object \n",
+      " 27  streetAddress            20131 non-null  object \n",
+      " 28  taxAssessedValue         15909 non-null  float64\n",
+      " 29  timeOnZillow             20131 non-null  int64  \n",
+      " 30  zipcode                  20131 non-null  object \n",
+      " 31  zpid                     20131 non-null  int64  \n",
+      " 32  rentZestimate            15481 non-null  float64\n",
+      " 33  zestimate                13692 non-null  float64\n",
+      " 34  unit                     3487 non-null   object \n",
+      " 35  datePriceChanged         1582 non-null   float64\n",
+      " 36  priceChange              1582 non-null   float64\n",
+      " 37  group_type               925 non-null    object \n",
+      " 38  newConstructionType      1784 non-null   object \n",
+      " 39  priceSuffix              925 non-null    object \n",
+      " 40  providerListingID        976 non-null    object \n",
+      " 41  openHouse                6222 non-null   object \n",
+      " 42  open_house_info          6222 non-null   object \n",
+      " 43  videoCount               197 non-null    float64\n",
+      " 44  priceReduction           764 non-null    object \n",
+      " 45  isRentalWithBasePrice    26 non-null     object \n",
+      " 46  comingSoonOnMarketDate   734 non-null    float64\n",
+      "dtypes: bool(8), float64(15), int64(3), object(21)\n",
+      "memory usage: 6.1+ MB\n"
+     ]
+    }
+   ],
+   "source": [
+    "converted_data.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7f3b199a-32bd-4203-8ea3-a8120f510db3",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2a6c4027-3b70-45ca-82d2-4cea1023b24d",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d19cddf5-a0e5-4356-adcb-8f31bb2d0025",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
